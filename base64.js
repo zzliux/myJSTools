@@ -4,75 +4,82 @@ var base64 = {
 		for(var i=0; i<str.length; i++){
 			var t = this.charToUTF8Code(str[i]);
 			if(t.length === 1){
-				arrX8.push(this.hackZero(t[0].toString(2), 8));
+				arrX8.push(t[0]);
 			}else{
 				for(var j=0; j<t.length; j++){
-					arrX8.push(t[j].toString(2));
+					arrX8.push(t[j]);
 				}
 			}
 		}
-		var t = arrX8.join('');
 		var ret = '';
-		for(var i=0; i<t.length-6; i+=6){
-			ret += this.__map[parseInt(t.substr(i, 6),2)];
+		for(var i=0; i<=arrX8.length-3; i+=3){
+			ret += this.__map[arrX8[i]>>2];
+			ret += this.__map[((arrX8[i]<<4)&0x3F)|(arrX8[i+1]>>4)];
+			ret += this.__map[((arrX8[i+1]<<2)&0x3F)|(arrX8[i+2]>>6)];
+			ret += this.__map[arrX8[i+2]&0x3F];
 		}
-		// 判断最后补等号
-		if(t.length%6 === 0 && t.length>0){
-			ret += this.__map[parseInt(t.slice(-6),2)];
-		}else if(t.length%6 === 4){
-			ret += this.__map[parseInt(t.slice(-4)+'00',2)] + '=';
-		}else if(t.length%6 === 2){
-			ret += this.__map[parseInt(t.slice(-2)+'0000',2)] + '==';
+		if(arrX8.length%3 === 2){
+			ret += this.__map[arrX8[arrX8.length-2]>>2];
+			ret += this.__map[(arrX8[arrX8.length-2]<<4)&0x3F|(arrX8[arrX8.length-1]>>4)];
+			ret += this.__map[(arrX8[arrX8.length-1]<<2)&0x3F];
+			ret += '=';
+		}else if(arrX8.length%3 === 1){
+			ret += this.__map[arrX8[arrX8.length-1]>>2];
+			ret += this.__map[(arrX8[arrX8.length-1]<<4)&0x3F];
+			ret += '==';
 		}
 		return ret;
 	},
 	decode: function(str){
 		// TODO
-		var t = '';
+		var str = str.split('');
+		var arrX6 = [];
 		for(var i=0; i<str.length-3; i++){
-			t += this.hackZero(this.__pam[str.charAt(i)].toString(2), 6);
+			arrX6.push(this.__pam[str[i]]);
 		}
-		if(str.slice(-2) === '=='){
-			t += this.hackZero((this.__pam[str.charAt(str.length-3)]>>4).toString(2), 2)
-		}else if(str.slice(-1) === '='){
-			t += this.hackZero(this.__pam[str.charAt(str.length-3)].toString(2), 6);
-			t += this.hackZero((this.__pam[str.charAt(str.length-2)]>>2).toString(2), 4)
+		if(str[str.length-2] === '='){
+			arrX6.push(this.__pam[str[str.length-3]]);
+		}else if(str[str.length-1] === '='){
+			arrX6.push(this.__pam[str[str.length-3]]);
+			arrX6.push(this.__pam[str[str.length-2]]);
 		}else{
-			t += this.hackZero(this.__pam[str.charAt(str.length-3)].toString(2), 6);
-			t += this.hackZero(this.__pam[str.charAt(str.length-2)].toString(2), 6);
-			t += this.hackZero(this.__pam[str.charAt(str.length-1)].toString(2), 6);
+			arrX6.push(this.__pam[str[str.length-3]]);
+			arrX6.push(this.__pam[str[str.length-2]]);
+			arrX6.push(this.__pam[str[str.length-1]]);
+		}
+
+		var arrX8 = [];
+		for(var i=0; i<=arrX6.length-4; i+=4){
+			arrX8.push((arrX6[i]<<2) | (arrX6[i+1]>>4));
+			arrX8.push(((arrX6[i+1]&0xF)<<4) | (arrX6[i+2]>>2));
+			arrX8.push(((arrX6[i+2]&0x3)<<6) | arrX6[i+3]);
+		}
+
+
+		if(arrX6.length%4 === 2){
+			arrX8.push((arrX6[arrX6.length-2]<<2) | (arrX6[arrX6.length-1]>>4))
+		}else if(arrX6.length%4 === 3){
+			arrX8.push((arrX6[arrX6.length-3]<<2) | (arrX6[arrX6.length-2]>>4));
+			arrX8.push(((arrX6[arrX6.length-2]&0xF)<<4) | (arrX6[arrX6.length-1]>>2));
 		}
 
 		var ret = '';
-		for(var i=0; i<t.length; i+=8){
-			if(t.charAt(i) === '0'){
+		for(var i=0; i<arrX8.length; i++){
+			if((arrX8[i]>>7) === 0x0){
 				// 单字节
-				ret += String.fromCharCode(parseInt(t.substr(i, 8), 2));
-			}else{
-				// 多字节字符
-				if(t.charAt(i+2) === '0'){
-					// 双字节
-					var b1 = parseInt(t.substr(i, 8),2) & 0x1F;
-					var b2 = parseInt(t.substr(i+8, 8),2) & 0x3F;
-					i += 8;
-					ret += String.fromCharCode((b1<<6)|b2);
-				}else if(t.charAt(i+3) === '0'){
-					// 三字节
-					var b1 = parseInt(t.substr(i, 8),2) & 0xF;
-					var b2 = parseInt(t.substr(i+8, 8),2) & 0x3F;
-					var b3 = parseInt(t.substr(i+16, 8),2) & 0x3F;
-					i += 16;
-					ret += String.fromCharCode((b1<<12)|(b2<<6)|b3);
-				}else if(t.charAt(i+4) === '0'){
-					// 四字节
-					var b1 = parseInt(t.substr(i, 8),2) & 0x7;
-					var b2 = parseInt(t.substr(i+8, 8),2) & 0x3F;
-					var b3 = parseInt(t.substr(i+16, 8),2) & 0x3F;
-					var b4 = parseInt(t.substr(i+24, 8),2) & 0x3F;
-					i += 24;
-					ret += String.fromCharCode((b1<<18)|(b2<<12)|(b3<<6)|b4);
-				}
-				// TODO 五六字节
+				ret += String.fromCharCode(arrX8[i]);
+			}else if((arrX8[i]>>5) === 0x6){
+				// 双字节
+				ret += String.fromCharCode( ((arrX8[i]&0x1F)<<6) | (arrX8[i+1]&0x3F) );
+				i += 1;
+			}else if((arrX8[i]>>4) === 0xE){
+				// 三字节
+				ret += String.fromCharCode( ((arrX8[i]&0xF)<<12) | ((arrX8[i+1]&0x3F)<<6) | (arrX8[i+2]&0x3F) );
+				i += 2;
+			}else if((arrX8[i]>>3) === 0x1E){
+				// 四字节
+				ret += String.fromCharCode( ((arrX8[i]&0x7)<<18) | ((arrX8[i+1]&0x3F)<<12) | ((arrX8[i+2]&0x3F)<<6) | (arrX8[i+3]&0x3F) );
+				i += 3;
 			}
 		}
 		return ret;
@@ -103,13 +110,5 @@ var base64 = {
 		* U+00200000 – U+03FFFFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 		* U+04000000 – U+7FFFFFFF   1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
 		*/
-	},
-	hackZero: function(str, length){
-		if(!length) length = 2;
-		str = str.toString();
-		while(str.length < length){
-			str = '0' + str;
-		}
-		return str;
 	}
 }
