@@ -5,6 +5,17 @@
 	<title>Document</title>
 </head>
 <body>
+<!-- <script src="_base64.js"></script> -->
 <script src="../base64.js"></script>
+<script>
+var t1 = (new Date()).getTime();
+
+for(var i=0; i<100000; i++){
+	// base64.decode('5LuK5aSp5pivMjAxN+W5tDjmnIgyNOaXpe+8jOaYn+acnzM=');
+	// base64.encode('今天是2017年8月24日，星期3');
+}
+var t2 = (new Date()).getTime();
+console.log(t2-t1);
+</script>
 </body>
 </html>
