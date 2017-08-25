@@ -32,9 +32,11 @@ var base64 = {
 		return ret;
 	},
 	decode: function(str){
+		// var reg = /^([a-zA-Z0-9\+\/]{4})*(([a-zA-Z0-9\+\/]{4})|([a-zA-Z0-9\+\/]{3}=)|([a-zA-Z0-9\+\/]{2}==))$/;
+		// if(!reg.test(str)) return null;
 		// str = str.split('');
 		var arrX8 = [];
-		// var b1, b2, b3, b4;
+		var b1, b2, b3, b4;
 		for(var i=0; i<str.length-4; i+=4){
 			b1 = this.__pam(str[i]);
 			b2 = this.__pam(str[i+1]);
@@ -58,15 +60,11 @@ var base64 = {
 		var ret = '';
 		for(var i=0; i<arrX8.length; i++){
 			if((arrX8[i]>>7) === 0x0){
-				// 单字节
 				ret += String.fromCharCode(arrX8[i]);
 			}else if((arrX8[i]>>5) === 0x6){
-				// 双字节
 				ret += String.fromCharCode( ((arrX8[i]&0x1F)<<6) | (arrX8[i+1]&0x3F) );
 				i += 1;
-			// }else if((arrX8[i]>>4) === 0xE){
 			}else{
-				// 三字节
 				ret += String.fromCharCode( ((arrX8[i]&0xF)<<12) | ((arrX8[i+1]&0x3F)<<6) | (arrX8[i+2]&0x3F) );
 				i += 2;
 			}
@@ -90,15 +88,12 @@ var base64 = {
 		}
 	},
 
-	// 其实这个过程可以由encodeURIcomponet代替
 	charToUTF8Code: function(chr){
-		// 得到utf16编码
 		var u16code = chr.charCodeAt(0);
 		if(0x0 <= u16code && 0x7F >= u16code){
 			return [u16code];
 		}else if(0x80 <= u16code && 0x7FF >= u16code){
 			return [0x60|((u16code>>6)&0x1F), 0x80|(u16code&0x3F)];
-		// }else if(0x800 <= u16code && 0xFFFF >= u16code){
 		}else{
 			return [0xE0|((u16code>>12)&0xF), 0x80|((u16code>>6)&0x3F), 0x80|((u16code)&0x3F)];
 		}
