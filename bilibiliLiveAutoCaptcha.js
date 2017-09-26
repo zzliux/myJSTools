@@ -4,6 +4,7 @@ var ocr = {
 	img: null,
 	imgData: null,
 	redChannel: null,
+	expresstion: null,
 	init: function(){
 		this.canvas = document.createElement("canvas");
 		this.ctx = this.canvas.getContext('2d');
@@ -81,6 +82,7 @@ var ocr = {
 			result += minKey;
 			i = R;
 		}
+		this.expresstion = result;
 		return eval(result);
 	}
 };
@@ -115,7 +117,16 @@ function autoCaptcha(){
 	ocr.loadImage(document.getElementsByClassName('captcha-img v-top')[0]);
 	var res = ocr.test();
 	document.getElementsByClassName('live-input material')[0].value = res;
+	console.log('[计算]' + ocr.expresstion + '=' + res);
 }
 !function(){
-	autoCaptcha();
+	// autoCaptcha();
+	var bt = document.createElement('button');
+	document.getElementsByClassName('box-panel live-popup-panel dp-none acquire')[0].append(bt);
+	bt.innerHTML = '自动计算';
+	bt.style = 'position:absolute;bottom:15px;left:15px;';
+	bt.setAttribute('class', 'live-btn default')
+	bt.addEventListener('click', function(){
+		autoCaptcha();
+	});
 }()
