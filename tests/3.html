@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div style="display:none"><img src="c1.jpg"></div>
+<script src="../ocrTest.js"></script>
+<script>
+ocr.init();
+// document.getElementsByTagName('BODY')[0].append(ocr.canvas);
+
+
+
+document.getElementsByTagName('BODY')[0].append(ocr.canvas);
+
+
+setTimeout(function(){
+	ocr.loadImage(document.getElementsByTagName('img')[0]);
+
+	var str = '';
+	for(var i=0; i<ocr.redChannel.length; i++){
+		for(var j=0; j<ocr.redChannel[i].length; j++){
+			str += ocr.redChannel[i][j] < 220 ? '■' : '□';
+		}
+		str += '\n'
+	}
+	console.log(str);
+},1000);
+
+</script>
+</body>
+</html>

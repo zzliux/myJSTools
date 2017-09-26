@@ -1,3 +1,6 @@
+/**
+ * 高效Base64加解密
+ */
 var base64 = {
 	encode: function(str){
 		var arrX8 = [];
@@ -75,12 +78,12 @@ var base64 = {
 	__map: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'],
 	__pam: function(chr){
 		var u16code = chr.charCodeAt(0);
-		if(u16code>47 && u16code<58) {
-			return u16code+4;
-		}else if(u16code>64 && u16code<91){
-			return u16code-65;
-		}else if(u16code>96 && u16code<123){
-			return u16code-71;
+		if(u16code > 47 && u16code < 58) {
+			return u16code + 4;
+		}else if(u16code > 64 && u16code < 91){
+			return u16code - 65;
+		}else if(u16code > 96 && u16code < 123){
+			return u16code - 71;
 		}else if(u16code === 43){
 			return 62;
 		}else {
