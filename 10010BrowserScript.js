@@ -4,7 +4,7 @@
 /* 浏览器脚本，访问上面url后登录，然后在console执行下面这个脚本，每分钟会自动把套餐余量打印在控制台和浏览器 */
 (function(){
 	setInterval(requestAndLogInfo, 60000);
-	$('body').html('<pre id="log" style="font-size: 30px"></pre><div><button id="refresh">手动更新</button><button id="flag" data-option="false">开启每分钟自动更新</button></div>');
+	$('body').html('<pre id="log" style="font-size: 30px"></pre><div><span style="font-size: 14px">操作：</span><button id="refresh">更新</button><br><span style="font-size: 14px">状态：</span><button id="flag" data-option="false">手动更新</button></div>');
 	$('#refresh').on('click', function(){
 		requestAndLogInfo();
 	});
@@ -13,11 +13,11 @@
 		if($('#flag').attr('data-option') == 'true'){
 			intervalId && clearInterval(intervalId);
 			$('#flag').attr('data-option', 'false');
-			$('#flag').html('关闭每分钟自动更新');
+			$('#flag').html('手动更新');
 		}else{
-			intervalId = setInterval(requestAndLogInfo, 60000);
+			intervalId = setInterval(requestAndLogInfo, 10000);
 			$('#flag').attr('data-option', 'true');
-			$('#flag').html('开启每分钟自动更新');
+			$('#flag').html('自动更新');
 		}
 	});
 	function requestAndLogInfo(){
@@ -60,6 +60,9 @@
 				$('#log').html(table+'\n\t'+(new Date()));
 			},
 			error: function(err){
+				$('#log').html('网络请求失败');
+				$('#flag').attr('data-option', 'true');
+				$('#flag').trigger('click')
 				console.log(err);
 			}
 		});
