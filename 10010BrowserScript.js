@@ -3,7 +3,6 @@
  */
 /* 浏览器脚本，访问上面url后登录，然后在console执行下面这个脚本，每分钟会自动把套餐余量打印在控制台和浏览器 */
 (function(){
-	setInterval(requestAndLogInfo, 60000);
 	$('body').html('<pre id="log" style="font-size: 30px"></pre><div><span style="font-size: 14px">操作：</span><button id="refresh">更新</button><br><span style="font-size: 14px">状态：</span><button id="flag" data-option="false">手动更新</button></div>');
 	$('#refresh').on('click', function(){
 		requestAndLogInfo();
@@ -15,7 +14,7 @@
 			$('#flag').attr('data-option', 'false');
 			$('#flag').html('手动更新');
 		}else{
-			intervalId = setInterval(requestAndLogInfo, 10000);
+			intervalId = setInterval(requestAndLogInfo, 120000);
 			$('#flag').attr('data-option', 'true');
 			$('#flag').html('自动更新');
 		}
@@ -27,6 +26,12 @@
 			success: function(data){
 				var reg = /<div class='busiDetailInfo5'>([\s\S]+?)<\/div>/g;
 				var ret = data.match(reg);
+				if(ret == null){
+					$('#log').html('网络请求失败');
+					$('#flag').attr('data-option', 'true');
+					$('#flag').trigger('click');
+					return ;
+				}
 				var width = [], maxWidth = 0;
 				for(var i=0; i<ret.length; i++){
 					ret[i] = ret[i].replace(/<.+?>|[\s]/g, '');
@@ -38,7 +43,6 @@
 						maxWidth = width[i].real;
 					}
 				}
-				console.log(ret);
 				var table = '\
 ·-·\n\
 |?|\n\
@@ -62,7 +66,7 @@
 			error: function(err){
 				$('#log').html('网络请求失败');
 				$('#flag').attr('data-option', 'true');
-				$('#flag').trigger('click')
+				$('#flag').trigger('click');
 				console.log(err);
 			}
 		});
