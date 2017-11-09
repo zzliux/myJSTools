@@ -14,7 +14,7 @@
 			$('#flag').attr('data-option', 'false');
 			$('#flag').html('手动更新');
 		}else{
-			intervalId = setInterval(requestAndLogInfo, 120000);
+			intervalId = setInterval(requestAndLogInfo, 300000);
 			$('#flag').attr('data-option', 'true');
 			$('#flag').html('自动更新');
 		}
